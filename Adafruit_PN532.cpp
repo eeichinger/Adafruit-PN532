@@ -1055,7 +1055,7 @@ uint8_t Adafruit_PN532::mifareclassic_WriteNDEFURI (uint8_t sectorNumber, uint8_
   // in NDEF records
 
   // Setup the sector buffer (w/pre-formatted TLV wrapper and NDEF message)
-  uint8_t sectorbuffer1[16] = {0x00, 0x00, 0x03, len+5, 0xD1, 0x01, len+1, 0x55, uriIdentifier, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+  uint8_t sectorbuffer1[16] = {0x00, 0x00, 0x03, byte(5+len), 0xD1, 0x01, byte(len+1), 0x55, uriIdentifier, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
   uint8_t sectorbuffer2[16] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
   uint8_t sectorbuffer3[16] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
   uint8_t sectorbuffer4[16] = {0xD3, 0xF7, 0xD3, 0xF7, 0xD3, 0xF7, 0x7F, 0x07, 0x88, 0x40, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
@@ -1423,10 +1423,10 @@ uint8_t Adafruit_PN532::ntag2xx_WriteNDEFURI (uint8_t uriIdentifier, char * url,
     0x44,         /* Size in bytes of a page and the number of bytes each lock bit can lock (4 bit + 4 bits) */
     /* NDEF Message TLV - URI Record */
     0x03,         /* Tag Field (0x03 = NDEF Message) */
-    len+5,        /* Payload Length (not including 0xFE trailer) */
+    byte(len+5),        /* Payload Length (not including 0xFE trailer) */
     0xD1,         /* NDEF Record Header (TNF=0x1:Well known record + SR + ME + MB) */
     0x01,         /* Type Length for the record type indicator */
-    len+1,        /* Payload len */
+    byte(len+1),        /* Payload len */
     0x55,         /* Record Type Indicator (0x55 or 'U' = URI Record) */
     uriIdentifier /* URI Prefix (ex. 0x01 = "http://www.") */
   };
