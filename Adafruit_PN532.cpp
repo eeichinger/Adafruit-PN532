@@ -4,18 +4,18 @@
     @author   Adafruit Industries
     @license  BSD (see license.txt)
 
-	  Driver for NXP's PN532 NFC/13.56MHz RFID Transceiver
+    Driver for NXP's PN532 NFC/13.56MHz RFID Transceiver
 
-	  This is a library for the Adafruit PN532 NFC/RFID breakout boards
-	  This library works with the Adafruit NFC breakout
-	  ----> https://www.adafruit.com/products/364
+    This is a library for the Adafruit PN532 NFC/RFID breakout boards
+    This library works with the Adafruit NFC breakout
+    ----> https://www.adafruit.com/products/364
 
-	  Check out the links above for our tutorials and wiring diagrams
-	  These chips use SPI or I2C to communicate.
+    Check out the links above for our tutorials and wiring diagrams
+    These chips use SPI or I2C to communicate.
 
-	  Adafruit invests time and resources providing this open source code,
-	  please support Adafruit and open-source hardware by purchasing
-	  products from Adafruit!
+    Adafruit invests time and resources providing this open source code,
+    please support Adafruit and open-source hardware by purchasing
+    products from Adafruit!
 
     @section  HISTORY
 
@@ -573,6 +573,45 @@ bool Adafruit_PN532::readPassiveTargetID(uint8_t cardbaudrate, uint8_t * uid, ui
     return 0x0;  // no cards read
   }
 
+  completeReadPassiveTargetID(uid, uidLength, timeout);
+}
+
+/**************************************************************************/
+/*!
+    Put reader into wait state for an ISO14443A target to enter the field. 
+    IRQ line will be pulled low to indicate card present. Use 
+    completeReadPassiveTargetID() to get the ID.
+
+    @param  cardBaudRate  Baud rate of the card
+
+    @returns 1
+*/
+/**************************************************************************/
+bool Adafruit_PN532::beginReadPassiveTargetID(uint8_t cardbaudrate) {
+  pn532_packetbuffer[0] = PN532_COMMAND_INLISTPASSIVETARGET;
+  pn532_packetbuffer[1] = 1;  // max 1 cards at once (we can set this to 2 later)
+  pn532_packetbuffer[2] = cardbaudrate;
+
+  sendCommandCheckAck(pn532_packetbuffer, 3, 1); // don't wait for ack
+
+  return 1;
+}
+
+/**************************************************************************/
+/*!
+    
+    Reads ID of present ISO14443A target (if any). Requires to call 
+    beginReadPassiveTargetID() first!
+
+    @param  uid           Pointer to the array that will be populated
+                          with the card's UID (up to 7 bytes)
+    @param  uidLength     Pointer to the variable that will hold the
+                          length of the card's UID.
+
+    @returns 1 if everything executed properly, 0 for an error
+*/
+/**************************************************************************/
+bool Adafruit_PN532::completeReadPassiveTargetID(uint8_t * uid, uint8_t * uidLength, uint16_t timeout) {
   // wait for a card to enter the field (only possible with I2C)
   if (!_usingSPI) {
     #ifdef PN532DEBUG
@@ -1550,7 +1589,7 @@ bool Adafruit_PN532::waitready(uint16_t timeout) {
       timer += 10;
       if (timer > timeout) {
         #ifdef PN532DEBUG
-        PN532DEBUGPRINT.println("TIMEOUT!");
+          PN532DEBUGPRINT.println("TIMEOUT!");
         #endif
         return false;
       }

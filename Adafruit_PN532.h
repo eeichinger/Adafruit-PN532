@@ -2,28 +2,28 @@
 /*! 
     @file     Adafruit_PN532.h
     @author   Adafruit Industries
-	@license  BSD (see license.txt)
-	
+  @license  BSD (see license.txt)
+  
 
-	This is a library for the Adafruit PN532 NFC/RFID breakout boards
-	This library works with the Adafruit NFC breakout 
-	----> https://www.adafruit.com/products/364
-	
-	Check out the links above for our tutorials and wiring diagrams 
+  This is a library for the Adafruit PN532 NFC/RFID breakout boards
+  This library works with the Adafruit NFC breakout 
+  ----> https://www.adafruit.com/products/364
+  
+  Check out the links above for our tutorials and wiring diagrams 
   These chips use SPI or I2C to communicate.
-	
-	Adafruit invests time and resources providing this open source code, 
-	please support Adafruit and open-source hardware by purchasing 
-	products from Adafruit!
+  
+  Adafruit invests time and resources providing this open source code, 
+  please support Adafruit and open-source hardware by purchasing 
+  products from Adafruit!
 
-	@section  HISTORY
+  @section  HISTORY
 
   v2.0  - Refactored to add I2C support from Adafruit_NFCShield_I2C library.
 
-	v1.1  - Added full command list
+  v1.1  - Added full command list
           - Added 'verbose' mode flag to constructor to toggle debug output
           - Changed readPassiveTargetID() to return variable length values
-	
+  
 */
 /**************************************************************************/
 
@@ -170,6 +170,10 @@ class Adafruit_PN532{
   
   // ISO14443A functions
   bool readPassiveTargetID(uint8_t cardbaudrate, uint8_t * uid, uint8_t * uidLength, uint16_t timeout = 0); //timeout 0 means no timeout - will block forever.
+  // pair of functions to async read passive target id using IRQ
+  bool beginReadPassiveTargetID(uint8_t cardbaudrate);
+  bool completeReadPassiveTargetID(uint8_t *uid, uint8_t *uidLength, uint16_t timeout = 0);
+
   bool inDataExchange(uint8_t * send, uint8_t sendLength, uint8_t * response, uint8_t * responseLength);
   bool inListPassiveTarget();
   uint8_t AsTarget();
