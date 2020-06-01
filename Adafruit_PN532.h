@@ -163,7 +163,7 @@ class Adafruit_PN532{
   // Generic PN532 functions
   bool     SAMConfig(void);
   uint32_t getFirmwareVersion(void);
-  bool     sendCommandCheckAck(uint8_t *cmd, uint8_t cmdlen, uint16_t timeout = 1000);  
+  bool     sendCommandCheckAck(uint8_t *cmd, uint8_t cmdlen, uint16_t timeout = 1000, bool waitReady = true);  
   bool     writeGPIO(uint8_t pinstate);
   uint8_t  readGPIO(void);
   bool     setPassiveActivationRetries(uint8_t maxRetries);

@@ -63,7 +63,7 @@ byte pn532ack[] = {0x00, 0x00, 0xFF, 0x00, 0xFF, 0x00};
 byte pn532response_firmwarevers[] = {0x00, 0xFF, 0x06, 0xFA, 0xD5, 0x03};
 
 // Uncomment these lines to enable debug output for PN532(SPI) and/or MIFARE related code
-// #define PN532DEBUG
+//#define PN532DEBUG
 // #define MIFAREDEBUG
 
 // If using Native Port on Arduino Zero or Due define as SerialUSB
@@ -135,7 +135,7 @@ Adafruit_PN532::Adafruit_PN532(uint8_t clk, uint8_t miso, uint8_t mosi, uint8_t 
   _hardwareSPI(false)
 {
   pinMode(_ss, OUTPUT);
-  digitalWrite(_ss, HIGH); 
+  digitalWrite(_ss, HIGH);
   pinMode(_clk, OUTPUT);
   pinMode(_mosi, OUTPUT);
   pinMode(_miso, INPUT);
@@ -181,7 +181,7 @@ Adafruit_PN532::Adafruit_PN532(uint8_t ss):
   _hardwareSPI(true)
 {
   pinMode(_ss, OUTPUT);
-  digitalWrite(_ss, HIGH); 
+  digitalWrite(_ss, HIGH);
 }
 
 /**************************************************************************/
@@ -347,7 +347,7 @@ uint32_t Adafruit_PN532::getFirmwareVersion(void) {
 */
 /**************************************************************************/
 // default timeout of one second
-bool Adafruit_PN532::sendCommandCheckAck(uint8_t *cmd, uint8_t cmdlen, uint16_t timeout) {
+bool Adafruit_PN532::sendCommandCheckAck(uint8_t *cmd, uint8_t cmdlen, uint16_t timeout, bool waitReady) {
   uint16_t timer = 0;
 
   // write the command
@@ -374,7 +374,7 @@ bool Adafruit_PN532::sendCommandCheckAck(uint8_t *cmd, uint8_t cmdlen, uint16_t 
 
   // For SPI only wait for the chip to be ready again.
   // This is unnecessary with I2C.
-  if (_usingSPI) {
+  if (_usingSPI && waitReady) {
     if (!waitready(timeout)) {
       return false;
     }
@@ -382,6 +382,7 @@ bool Adafruit_PN532::sendCommandCheckAck(uint8_t *cmd, uint8_t cmdlen, uint16_t 
 
   return true; // ack'd command
 }
+
 
 /**************************************************************************/
 /*!
@@ -578,8 +579,8 @@ bool Adafruit_PN532::readPassiveTargetID(uint8_t cardbaudrate, uint8_t * uid, ui
 
 /**************************************************************************/
 /*!
-    Put reader into wait state for an ISO14443A target to enter the field. 
-    IRQ line will be pulled low to indicate card present. Use 
+    Put reader into wait state for an ISO14443A target to enter the field.
+    IRQ line will be pulled low to indicate card present. Use
     completeReadPassiveTargetID() to get the ID.
 
     @param  cardBaudRate  Baud rate of the card
@@ -592,15 +593,15 @@ bool Adafruit_PN532::beginReadPassiveTargetID(uint8_t cardbaudrate) {
   pn532_packetbuffer[1] = 1;  // max 1 cards at once (we can set this to 2 later)
   pn532_packetbuffer[2] = cardbaudrate;
 
-  sendCommandCheckAck(pn532_packetbuffer, 3, 1); // don't wait for ack
+  sendCommandCheckAck(pn532_packetbuffer, 3, 1, false); // don't wait for ready
 
   return 1;
 }
 
 /**************************************************************************/
 /*!
-    
-    Reads ID of present ISO14443A target (if any). Requires to call 
+
+    Reads ID of present ISO14443A target (if any). Requires to call
     beginReadPassiveTargetID() first!
 
     @param  uid           Pointer to the array that will be populated
