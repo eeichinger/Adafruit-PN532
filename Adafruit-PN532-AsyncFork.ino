@@ -37,7 +37,7 @@ void setup() {
   versiondata = nfc.getFirmwareVersion();
   if (! versiondata) {
     Serial.print("Didn't find PN53x board");
-    //    while (1); // halt
+    while (1); // halt
   } else {
     // Got ok data, print it out!
     Serial.print("Found chip PN5"); Serial.println((versiondata >> 24) & 0xFF, HEX);
@@ -48,45 +48,47 @@ void setup() {
   }
 
   delay(10);       // Optional delay. Some board do need more time after init to be ready, see Readme
+
+  // register interrupt handler
   attachInterrupt(digitalPinToInterrupt(PN532_IRQ), handleInterrupt, FALLING);
-  // start listening mode
+  // start async listening mode
   nfc.beginReadPassiveTargetID(PN532_MIFARE_ISO14443A);
   asyncCommandResultPending = true;
   asyncCommandResultAvailable = false;
 }
 
-byte success = false;
-byte uid[] = "\0\0\0\0\0\0\0"; // Buffer to store the returned UID
-byte uidLength;                        // Length of the UID (4 or 7 bytes depending on ISO14443A card type)
-
 void loop() {
+  byte success = false;
+  byte uid[] = "\0\0\0\0\0\0\0"; // Buffer to store the returned UID
+  byte uidLength;                // Length of the UID (4 or 7 bytes depending on ISO14443A card type)
 
-  unsigned long time = micros();
+  unsigned long timeForConsumeResult = micros();
 
+  // shouldn't be needed, but just to be safe disable interrupts while reading card id
+  // note: this blocks interrupts for ~1.5ms causing issues if your timing requirements are more sensitive
   noInterrupts();
+  // fetch result if IRQ line indicates that there is one
   if (asyncCommandResultAvailable == true) {
     asyncCommandResultAvailable = false;
-    uidLength = 0;
     success = nfc.completeReadPassiveTargetID(uid, &uidLength);
+    Serial.print("Interrupt, Success:"); Serial.println(success, HEX);
   }
   interrupts();
-  Serial.print("Interrupt, Success:"); Serial.println(success, HEX);
-  
-  if (success && uidLength > 0) {
-    time = micros() - time;
+
+  if (success) {
+    timeForConsumeResult = micros() - timeForConsumeResult;
     success = false;
     // Display some basic information about the card
     Serial.println("Found an ISO14443A card");
-    Serial.println("  Time: "); Serial.print(time);
+    Serial.println("  Time Taken: "); Serial.print(timeForConsumeResult);
     Serial.print("  UID Length: "); Serial.print(uidLength, DEC); Serial.println(" bytes");
     Serial.print("  UID Value: ");
     nfc.PrintHex(uid, uidLength);
     Serial.println("");
     // put back into listening mode
     nfc.beginReadPassiveTargetID(PN532_MIFARE_ISO14443A);
-    asyncCommandResultPending = true;    
+    asyncCommandResultPending = true;
   }
   Serial.flush();
-//  interruptEnabled = true;
   delay(100);
 }
