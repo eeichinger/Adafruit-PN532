@@ -29,12 +29,10 @@ void handleInterrupt() {
 // the setup function runs once when you press reset or power the board
 void setup() {
   Serial.begin(115200);
-  Serial.println("Init PN532");
+  Serial.println("Init PN532");  
   nfc.begin();
   delay(100);
   uint32_t versiondata = nfc.getFirmwareVersion();
-  delay(100);
-  versiondata = nfc.getFirmwareVersion();
   if (! versiondata) {
     Serial.print("Didn't find PN53x board");
     while (1); // halt
