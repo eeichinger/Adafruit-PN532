@@ -3,5 +3,6 @@
     "port": "/dev/tty.usbmodem14201",
     "programmer": "AVRISP mkII",
     "sketch": "examples/readMifareClassicSpiAsync/readMifareClassicSpiAsync.ino",
-    "output": "/tmp/arduino_vscode_output"
+    "output": "/tmp/output",
+    "libraries": "asdadasd"
 }
