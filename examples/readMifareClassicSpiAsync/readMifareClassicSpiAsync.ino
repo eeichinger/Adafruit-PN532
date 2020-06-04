@@ -2,7 +2,7 @@
    Demo for non-blocking wait for ID targets using SPI and IRQ
 */
 
-#include "Adafruit_PN532.h"
+#include <Adafruit_PN532.h>
 
 // If using the breakout with SPI, define the pins for SPI communication.
 #define PN532_SS   (10)
@@ -29,7 +29,7 @@ void handleInterrupt() {
 // the setup function runs once when you press reset or power the board
 void setup() {
   Serial.begin(115200);
-  Serial.println("Init PN532");  
+  Serial.println("Init PN532");
   nfc.begin();
   delay(100);
   uint32_t versiondata = nfc.getFirmwareVersion();
