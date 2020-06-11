@@ -14,11 +14,6 @@
 // SCK = 13, MOSI = 11, MISO = 12.  The SS line can be any digital IO pin.
 Adafruit_PN532 nfc(PN532_SS);
 
-// NFC interrupt handler
-void handleInterrupt() {
-  nfc.handleInterrupt();
-}
-
 // the setup function runs once when you press reset or power the board
 void setup() {
   Serial.begin(115200);
@@ -40,8 +35,9 @@ void setup() {
 
   delay(10);       // Optional delay. Some board do need more time after init to be ready, see Readme
 
-  // register interrupt handler
-  attachInterrupt(digitalPinToInterrupt(PN532_IRQ), handleInterrupt, FALLING);
+  nfc.enableAsync(PN532_IRQ);
+  // // register interrupt handler
+  // attachInterrupt(digitalPinToInterrupt(PN532_IRQ), handleInterrupt, FALLING);
   // start async listening mode
   nfc.beginReadPassiveTargetID(PN532_MIFARE_ISO14443A);
 }
@@ -53,17 +49,10 @@ void loop() {
 
   unsigned long timeForConsumeResult = micros();
 
-  // shouldn't be needed, but just to be safe disable interrupts while reading card id
-  // note: this blocks interrupts for ~1.5ms causing issues if your timing requirements are more sensitive
-  noInterrupts();
   // fetch result if IRQ line indicates that there is one
-  if (nfc.isAsyncCommandResultAvailable()) {
-    success = nfc.completeReadPassiveTargetID(uid, &uidLength);
-    Serial.print("Interrupt, Success:"); Serial.println(success, HEX);
-  }
-  interrupts();
-
+  success = nfc.completeReadPassiveTargetID(uid, &uidLength);
   if (success) {
+    Serial.print("Interrupt, Success:"); Serial.println(success, HEX);
     timeForConsumeResult = micros() - timeForConsumeResult;
     success = false;
     // Display some basic information about the card

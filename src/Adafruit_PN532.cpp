@@ -604,6 +604,19 @@ bool Adafruit_PN532::beginReadPassiveTargetID(uint8_t cardbaudrate) {
   return 1;
 }
 
+Adafruit_PN532* Adafruit_PN532::s_irq2instance;
+
+// template<int irq_pin> 
+void Adafruit_PN532::myISR() {  
+  s_irq2instance->handleInterrupt();
+}
+
+bool Adafruit_PN532::enableAsync(uint8_t irq_pin) {
+  // register interrupt handler    
+  Adafruit_PN532::s_irq2instance = this;
+  attachInterrupt(digitalPinToInterrupt(irq_pin), Adafruit_PN532::myISR, FALLING);
+}
+
 /** 
   must be called from within ISR 
 */
@@ -611,11 +624,6 @@ void Adafruit_PN532::handleInterrupt() {
    if (!_asyncCommandResultPending) return; 
    _asyncCommandResultAvailable = true;
   _asyncCommandResultPending = false;
-}
-
-bool Adafruit_PN532::isAsyncCommandResultAvailable() {
-  return _asyncCommandResultAvailable 
-          && (!_asyncCommandResultPending);
 }
 
 /**************************************************************************/
@@ -633,7 +641,14 @@ bool Adafruit_PN532::isAsyncCommandResultAvailable() {
 */
 /**************************************************************************/
 bool Adafruit_PN532::completeReadPassiveTargetID(uint8_t * uid, uint8_t * uidLength, uint16_t timeout) {
-  if (!_asyncCommandResultAvailable) return false;
+  noInterrupts();
+  bool success = completeReadPassiveTargetIDInternal(uid, uidLength, timeout);
+  interrupts();
+  return success;
+}
+
+bool Adafruit_PN532::completeReadPassiveTargetIDInternal(uint8_t * uid, uint8_t * uidLength, uint16_t timeout) {
+  if (_asyncCommandResultPending || !_asyncCommandResultAvailable) return false;
   _asyncCommandResultAvailable = false;
   // wait for a card to enter the field (only possible with I2C)
   if (!_usingSPI) {

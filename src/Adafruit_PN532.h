@@ -174,9 +174,8 @@ class Adafruit_PN532{
   // pair of functions to async read passive target id using IRQ
   bool beginReadPassiveTargetID(uint8_t cardbaudrate);
   bool completeReadPassiveTargetID(uint8_t *uid, uint8_t *uidLength, uint16_t timeout = 0);
-  void handleInterrupt();
-  bool isAsyncCommandResultAvailable();
-  
+  bool enableAsync(uint8_t irq_pin);
+
   bool inDataExchange(uint8_t * send, uint8_t sendLength, uint8_t * response, uint8_t * responseLength);
   bool inListPassiveTarget();
   uint8_t AsTarget();
@@ -223,6 +222,12 @@ class Adafruit_PN532{
   bool isready();
   bool waitready(uint16_t timeout);
   bool readack();
+  
+  void handleInterrupt();
+  bool completeReadPassiveTargetIDInternal(uint8_t * uid, uint8_t * uidLength, uint16_t timeout);
+
+  static Adafruit_PN532* s_irq2instance;
+  static void myISR();
 
   // SPI-specific functions.
   void    spi_write(uint8_t c);

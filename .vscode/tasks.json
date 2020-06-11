@@ -6,7 +6,7 @@
     {
         "label": "Arduino: Build Active File",
         "type": "shell",
-        "command": "arduino-cli compile --fqbn arduino:avr:uno --warnings default --libraries ${workspaceFolder} -o /tmp/output.hex ${file}",
+        "command": "arduino-cli compile --fqbn arduino:avr:uno --optimize-for-debug --warnings default --libraries ${workspaceFolder} -o /tmp/output.hex ${file}",
         "isBackground": false,
         "presentation": {
             "echo": true,
@@ -24,7 +24,7 @@
     {
         "label": "Arduino: Upload Active File",
         "type": "shell",
-        "command": "arduino-cli compile -p /dev/cu.usbmodem14201 -v --warnings default --fqbn arduino:avr:uno --libraries ${workspaceFolder} -o /tmp/output.hex -u -t  ${file}",
+        "command": "arduino-cli compile -p /dev/cu.usbmodem14201 -v --optimize-for-debug --warnings default --fqbn arduino:avr:uno --libraries ${workspaceFolder} -o /tmp/output.hex -u -t  ${file}",
         "isBackground": false,
         "presentation": {
             "echo": true,
