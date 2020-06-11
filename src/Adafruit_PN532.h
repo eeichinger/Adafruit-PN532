@@ -170,10 +170,13 @@ class Adafruit_PN532{
   
   // ISO14443A functions
   bool readPassiveTargetID(uint8_t cardbaudrate, uint8_t * uid, uint8_t * uidLength, uint16_t timeout = 0); //timeout 0 means no timeout - will block forever.
+
   // pair of functions to async read passive target id using IRQ
   bool beginReadPassiveTargetID(uint8_t cardbaudrate);
   bool completeReadPassiveTargetID(uint8_t *uid, uint8_t *uidLength, uint16_t timeout = 0);
-
+  void handleInterrupt();
+  bool isAsyncCommandResultAvailable();
+  
   bool inDataExchange(uint8_t * send, uint8_t sendLength, uint8_t * response, uint8_t * responseLength);
   bool inListPassiveTarget();
   uint8_t AsTarget();
@@ -211,6 +214,8 @@ class Adafruit_PN532{
   uint8_t _inListedTag;  // Tg number of inlisted tag.
   bool    _usingSPI;     // True if using SPI, false if using I2C.
   bool    _hardwareSPI;  // True is using hardware SPI, false if using software SPI.
+  volatile bool _asyncCommandResultPending;
+  volatile bool _asyncCommandResultAvailable;
 
   // Low level communication functions that handle both SPI and I2C.
   void readdata(uint8_t* buff, uint8_t n);

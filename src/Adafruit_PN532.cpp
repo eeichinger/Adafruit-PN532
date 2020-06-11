@@ -589,13 +589,33 @@ bool Adafruit_PN532::readPassiveTargetID(uint8_t cardbaudrate, uint8_t * uid, ui
 */
 /**************************************************************************/
 bool Adafruit_PN532::beginReadPassiveTargetID(uint8_t cardbaudrate) {
+  if (_asyncCommandResultPending) {
+    return 0;
+  }
+
   pn532_packetbuffer[0] = PN532_COMMAND_INLISTPASSIVETARGET;
   pn532_packetbuffer[1] = 1;  // max 1 cards at once (we can set this to 2 later)
   pn532_packetbuffer[2] = cardbaudrate;
 
   sendCommandCheckAck(pn532_packetbuffer, 3, 1, false); // don't wait for ready
 
+  _asyncCommandResultPending = true;
+
   return 1;
+}
+
+/** 
+  must be called from within ISR 
+*/
+void Adafruit_PN532::handleInterrupt() {
+   if (!_asyncCommandResultPending) return; 
+   _asyncCommandResultAvailable = true;
+  _asyncCommandResultPending = false;
+}
+
+bool Adafruit_PN532::isAsyncCommandResultAvailable() {
+  return _asyncCommandResultAvailable 
+          && (!_asyncCommandResultPending);
 }
 
 /**************************************************************************/
@@ -613,6 +633,8 @@ bool Adafruit_PN532::beginReadPassiveTargetID(uint8_t cardbaudrate) {
 */
 /**************************************************************************/
 bool Adafruit_PN532::completeReadPassiveTargetID(uint8_t * uid, uint8_t * uidLength, uint16_t timeout) {
+  if (!_asyncCommandResultAvailable) return false;
+  _asyncCommandResultAvailable = false;
   // wait for a card to enter the field (only possible with I2C)
   if (!_usingSPI) {
     #ifdef PN532DEBUG

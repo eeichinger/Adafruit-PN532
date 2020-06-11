@@ -14,16 +14,9 @@
 // SCK = 13, MOSI = 11, MISO = 12.  The SS line can be any digital IO pin.
 Adafruit_PN532 nfc(PN532_SS);
 
-volatile bool asyncCommandResultAvailable = false;
-volatile bool asyncCommandResultPending = false;
-
 // NFC interrupt handler
 void handleInterrupt() {
-  if (!asyncCommandResultPending) return;
-  //  detachInterrupt(PN532_IRQ);
-  asyncCommandResultAvailable = true;
-  //  readerDisabled = true;
-  asyncCommandResultPending = false;
+  nfc.handleInterrupt();
 }
 
 // the setup function runs once when you press reset or power the board
@@ -51,8 +44,6 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(PN532_IRQ), handleInterrupt, FALLING);
   // start async listening mode
   nfc.beginReadPassiveTargetID(PN532_MIFARE_ISO14443A);
-  asyncCommandResultPending = true;
-  asyncCommandResultAvailable = false;
 }
 
 void loop() {
@@ -66,8 +57,7 @@ void loop() {
   // note: this blocks interrupts for ~1.5ms causing issues if your timing requirements are more sensitive
   noInterrupts();
   // fetch result if IRQ line indicates that there is one
-  if (asyncCommandResultAvailable == true) {
-    asyncCommandResultAvailable = false;
+  if (nfc.isAsyncCommandResultAvailable()) {
     success = nfc.completeReadPassiveTargetID(uid, &uidLength);
     Serial.print("Interrupt, Success:"); Serial.println(success, HEX);
   }
@@ -85,7 +75,6 @@ void loop() {
     Serial.println("");
     // put back into listening mode
     nfc.beginReadPassiveTargetID(PN532_MIFARE_ISO14443A);
-    asyncCommandResultPending = true;
   }
   Serial.flush();
   delay(100);
