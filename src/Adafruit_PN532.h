@@ -222,12 +222,15 @@ class Adafruit_PN532{
   bool isready();
   bool waitready(uint16_t timeout);
   bool readack();
-  
+
   void handleInterrupt();
   bool completeReadPassiveTargetIDInternal(uint8_t * uid, uint8_t * uidLength, uint16_t timeout);
 
-  static Adafruit_PN532* s_irq2instance;
-  static void myISR();
+  static Adafruit_PN532* s_irq2instance[2];
+  template<int irq>
+  static void myISR() {
+    s_irq2instance[irq]->handleInterrupt();
+  }
 
   // SPI-specific functions.
   void    spi_write(uint8_t c);

@@ -604,22 +604,25 @@ bool Adafruit_PN532::beginReadPassiveTargetID(uint8_t cardbaudrate) {
   return 1;
 }
 
-Adafruit_PN532* Adafruit_PN532::s_irq2instance;
-
-// template<int irq_pin> 
-void Adafruit_PN532::myISR() {  
-  s_irq2instance->handleInterrupt();
-}
+Adafruit_PN532* Adafruit_PN532::s_irq2instance[] = { NULL, NULL };
 
 bool Adafruit_PN532::enableAsync(uint8_t irq_pin) {
   // register interrupt handler    
-  Adafruit_PN532::s_irq2instance = this;
-  attachInterrupt(digitalPinToInterrupt(irq_pin), Adafruit_PN532::myISR, FALLING);
+  int irq = digitalPinToInterrupt(irq_pin);
+  Adafruit_PN532::s_irq2instance[irq] = this;
+  
+  void (*userFunc)(void);
+  switch (irq) {
+    case 0:
+      userFunc =  Adafruit_PN532::myISR<0>;
+      break;
+    case 1:
+      userFunc =  Adafruit_PN532::myISR<1>;
+      break;
+  }
+  attachInterrupt(digitalPinToInterrupt(irq_pin), userFunc, FALLING);
 }
 
-/** 
-  must be called from within ISR 
-*/
 void Adafruit_PN532::handleInterrupt() {
    if (!_asyncCommandResultPending) return; 
    _asyncCommandResultAvailable = true;

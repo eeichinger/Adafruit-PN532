@@ -36,8 +36,6 @@ void setup() {
   delay(10);       // Optional delay. Some board do need more time after init to be ready, see Readme
 
   nfc.enableAsync(PN532_IRQ);
-  // // register interrupt handler
-  // attachInterrupt(digitalPinToInterrupt(PN532_IRQ), handleInterrupt, FALLING);
   // start async listening mode
   nfc.beginReadPassiveTargetID(PN532_MIFARE_ISO14443A);
 }
@@ -52,7 +50,6 @@ void loop() {
   // fetch result if IRQ line indicates that there is one
   success = nfc.completeReadPassiveTargetID(uid, &uidLength);
   if (success) {
-    Serial.print("Interrupt, Success:"); Serial.println(success, HEX);
     timeForConsumeResult = micros() - timeForConsumeResult;
     success = false;
     // Display some basic information about the card
