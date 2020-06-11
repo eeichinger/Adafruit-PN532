@@ -6,7 +6,7 @@
     "configurations": [
         {
             "name": "Mac",
-            "defines": ["ARDUINO=101", "USBCON"],
+            "defines": ["ARDUINO=101", "USBCON", "__AVR__"],
             "includePath": [
                 "${workspaceFolder}/src",
                 "/Users/erich/Library/Arduino15/packages/arduino/tools/**",
